@@ -3,6 +3,8 @@ function initializeRaven() {
     if (error) throw error;
     RavenLogger.initialize({
       client: sentryDSN
+    }, {
+      trackUser: true
     });
     var orig = Meteor._debug;
     Meteor._debug = function() {

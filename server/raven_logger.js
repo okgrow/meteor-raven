@@ -13,6 +13,7 @@ function initializeRaven() {
     RavenLogger.initialize({
       server: sentryDSN
     }, {
+      trackUser: true,
       patchGlobal: function(isLogged, message) {
                      console.log("Uncaught exception: ", message);
                      process.exit(1);
