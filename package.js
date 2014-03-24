@@ -8,6 +8,8 @@ Npm.depends({
 
 Package.on_use(function (api, where) {
   api.add_files('lib/main.js', [ 'client', 'server' ]);
+  api.add_files('server/raven_logger.js', 'server');
+  api.add_files('client/raven_logger.js', 'client');
   api.add_files('vendor/raven.js', 'client');
 
   /**
