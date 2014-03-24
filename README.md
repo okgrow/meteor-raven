@@ -13,15 +13,38 @@ RavenJS: http://raven-js.readthedocs.org/
 
 RavenNode: https://github.com/mattrobenolt/raven-node
 
+Installation
+============
+
+In your `smart.json` file:
+
+<pre>
+{
+  "packages": {
+    "raven": {
+      "git": "https://github.com/okgrow/meteor-raven.git",
+      "branch": "master"
+    },
+  }
+}
+</pre>
+
+Then run `mrt install`.
+
+Set your `SENTRY_DSN` environment variable:
+
+<pre>
+SENTRY_DSN=https://public_key:private_key@app.getsentry.com/app_id
+</pre>
+
+That should be it! If `SENTRY_DSN` is not set, RavenLogger silently doesn't
+initialize. If you're using Heroku, this will just work.
+
 Usage
 ============
-Configure your client and server DSN keys and log an error message. For the
-client entry, don't include your private key. For the server entry, **include your private key.**
+
+Manually log a message:
 <pre>
-RavenLogger.initialize({
-  client: 'https://public_key@app.getsentry.com/app_id',            // Do not include your private key here
-  server: 'https://public_key:private_key@app.getsentry.com/app_id' // *DO* include your private key here
-});
 RavenLogger.log('Testing error message');
 </pre>
 
@@ -30,42 +53,23 @@ Optionally you can pass a tag:
 RavenLogger.log('Testing error message', { component: 'system' });
 </pre>
 
-If you are using the Meteor Accounts package, you can enable user tracking on errors:
-<pre>
-RavenLogger.initialize({
-  client: 'your client DSN here',
-  server: 'your server DSN here'
-}, {
-  trackUser: true
-});
-</pre>
-
 Raven also works very well with saving full error and exception stack traces. Simply pass an Error or a Meteor.Error object to the log method to keep the stack trace.
 <pre>
 RavenLogger.log(new Meteor.Error(422, 'Failed to save object to database'));
 </pre>
 
-Catching uncaught exceptions on the server:
-<pre>
-RavenLogger.initialize({
-  client: 'your client DSN here',
-  server: 'your server DSN here'
-}, {
-  patchGlobal: true
-});
-</pre>
+Notes
+=====
 
-You can also provide a callback to `patchGlobal`:
-<pre>
-RavenLogger.initialize({
-  client: 'your client DSN here',
-  server: 'your server DSN here'
-}, {
-  patchGlobal: function() {
-    console.log('Bye, bye, world');
-    process.exit(1);
-  }
-});
-</pre>
+Catches these exceptions:
 
-If no callback is provided, the default behaviour is to `exit(1)`.
+* Any server side exception, except where Meteor swallows exceptions (such as login handlers)
+* Client side: Exceptions within Deps.autorun() - except first call. Uncaught exceptions are not currently logged.
+
+TODO
+====
+
+* Permit custom configuration (`trackUser`, `patchGlobal` callback, etc).
+* Add user info when logging exceptions caught by `patchGlobal` on server side
+* Get better error handling in Meteor core, so we can remove the `Meteor._debug` hack
+* Tests
